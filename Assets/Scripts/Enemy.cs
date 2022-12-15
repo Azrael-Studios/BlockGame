@@ -74,15 +74,8 @@ public class Enemy : MonoBehaviour
         exp.Play();
         Destroy(gameObject, exp.duration);
         navAgent.isStopped = true;
-        playerController.health  -= 20;
+        playerController.TakeDamage(20);
         Debug.Log("Player health is " + playerController.health);
-        this.enabled = false;
-    }
-    public void Die()
-    {
-        explosion.SetActive(true);
-        navAgent.isStopped = true;
-        playerController.health -= 20;
         this.enabled = false;
     }
 }

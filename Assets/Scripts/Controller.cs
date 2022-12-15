@@ -9,10 +9,11 @@ public class Controller : MonoBehaviour
 {
     [Tooltip("Rigidbody component attached to the player")]
     public Rigidbody rb;
-    public int health = 100;
+    public float health;
+    public float maxHealth = 100;
     public GameObject deadMenu;
-    public Slider healthBar;
-    public Text percentageText;
+    public HealthBar healthBar;
+    public Transform camera;
 
     private float movementX;
     private float movementY;
@@ -28,27 +29,11 @@ public class Controller : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         Physics.gravity = new Vector3(0, -100, 0);
         gameObject.tag = "Player";
-        InitHeathBar();
-    }
-
-    IEnumerator InitHeathBar()
-    {
-        healthBar.value = health;
-        float value = 0.0f;
-        healthBar.maxValue = health;
-
-        while(value > 0)
-        {
-            yield return new WaitForSeconds(1.0f);
-        }
+        health = maxHealth;
     }
     void Update()
     {
         
-    }
-    void OnCollisionEnter(Collision collision)
-    {
-        // SceneManager.LoadScene(1);
     }
 
     // Update is called once per frame
@@ -60,9 +45,27 @@ public class Controller : MonoBehaviour
         movementY = movementVector.y;
     }
 
-    void OnJump()
+    public void OnJump()
     {
         jumpTime = 25;
+    }
+
+    void OnLook(InputValue rotationValue)
+    {
+        Vector2 rotationVector = rotationValue.Get<Vector2>();
+        rotationVector.x = Mathf.Clamp(rotationVector.x, 0, 1f);
+        rotationVector.y = Mathf.Clamp(rotationVector.y, 0, 1f);
+        Debug.Log(rotationVector);
+        // camera.Rotate(rotationVector.x, rotationVector.y, 0);
+        camera.eulerAngles = rotationVector;
+
+
+        //TODO:
+        /*
+            The rotation is not working at the moment for the camera. I believe that the solution is to store the rotation in a persistent
+            variable in order to ensure that it is not being reset to zero every time that the mouse input is zero. This should solve the problem.
+
+        */
     }
 
     void CalculateMovement(Vector3 jumpVelocity)
@@ -91,12 +94,11 @@ public class Controller : MonoBehaviour
             deadMenu.SetActive(true);
             Time.timeScale = 0;
         }
-        Debug.Log("Player health is " + health);
-        healthBar.value = health;
-        // percentageText.text = healthBar.value.ToString();
-        if(healthBar.value == health)
-        {
-            Debug.Log("Health is now " + health);
-        }
+    }
+
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+        healthBar.UpdateHealthBar();
     }
 }
